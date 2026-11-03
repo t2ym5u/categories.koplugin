@@ -17,7 +17,7 @@ One player may type their answers instead of writing them: tap a category during
 ## Features
 
 - Letters weighted by how often they start words; the awkward ones (K, Q, W, X, Y, Z in French — K, Q, U, X, Y, Z in English) only with **Hard letters: On**. No letter comes twice in a game until all have been drawn.
-- 457 French and 479 English categories in 8 packs — Classic, Fun, Geography, History & famous people, Pop culture, Food, Absurd, Kids (about 55–65 each) — picked in a multi-select **Category packs** menu that shows each pack's size (default: everything but Kids). No category repeats within a game until the selection runs dry.
+- 962 French and 962 English categories in 8 packs — Classic, Fun, Geography, History & famous people, Pop culture, Food, Absurd, Kids (about 110–130 each) — picked in a multi-select **Category packs** menu that shows each pack's size (default: everything but Kids). The categories already drawn are remembered from one game to the next (per language): no category comes back until the whole selection has been played.
 - Timer off or 1–5 minutes; only the digits refresh, once a second.
 - Configurable points: unique/shared = 2/1, 10/5 or 3/1.
 - Player names typed once (one per line) and remembered.

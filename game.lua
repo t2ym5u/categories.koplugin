@@ -45,10 +45,12 @@ local function copyList(t)
 end
 
 -- opts: players (list of names), lang, nb_categories, hard_letters, packs (set),
--- scoring, bank (list of { text, tag }), rng (function(n) -> 1..n)
+-- scoring, bank (list of { text, tag }), rng (function(n) -> 1..n),
+-- seen (optional SeenHistory: categories remembered across games)
 function Game.new(opts)
     local self = setmetatable({}, Game)
     self.rng           = opts.rng or math.random
+    self.seen          = opts.seen
     self.bank          = opts.bank or {}
     self.lang          = opts.lang or "en"
     self.nb_categories = opts.nb_categories or 8
@@ -134,9 +136,15 @@ function Game:eligibleCategories()
 end
 
 -- n distinct categories, avoiding the ones already played this game until
--- the selection runs dry.
+-- the selection runs dry. With a SeenHistory, the ones played in earlier
+-- games are avoided too, until the whole selection has come up.
 function Game:drawCategories(n)
     local all = self:eligibleCategories()
+    if self.seen then
+        local out = self.seen:draw(all, n, self.rng)
+        for _, text in ipairs(out) do self.used_cats[text] = true end
+        return out
+    end
     local fresh = {}
     for _, text in ipairs(all) do
         if not self.used_cats[text] then fresh[#fresh + 1] = text end

@@ -1,5 +1,5 @@
 -- busted specs for the Categories game logic and content banks.
-package.path = "./?.lua;" .. package.path
+package.path = "./?.lua;./common/?.lua;" .. package.path
 local Game = require("game")
 
 local function bank(lang) return dofile("content_" .. lang .. ".lua") end
@@ -16,7 +16,7 @@ describe("content", function()
     for _, lang in ipairs({ "fr", "en" }) do
         it(lang .. " bank has at least 400 tagged, distinct categories", function()
             local b = bank(lang)
-            assert.is_true(#b >= 400, "only " .. #b)
+            assert.is_true(#b >= 900, "only " .. #b)
             local seen, tags = {}, {}
             for _, c in ipairs(b) do
                 assert.is_string(c.text)
@@ -31,9 +31,9 @@ describe("content", function()
                 assert.is_true(known[c.tag], c.text)
                 tags[c.tag] = (tags[c.tag] or 0) + 1
             end
-            -- every pack on its own can fill the largest round
+            -- every pack holds about 120 categories (110 at least)
             for _, t in ipairs(Game.PACKS) do
-                assert.is_true((tags[t] or 0) >= 12, t)
+                assert.is_true((tags[t] or 0) >= 110, t .. ": " .. tostring(tags[t]))
             end
         end)
     end
@@ -189,5 +189,68 @@ describe("save / restore", function()
         assert.is_false(g:load(nil))
         assert.is_false(g:load({ version = 99 }))
         assert.are.equal("setup", g.phase)
+    end)
+end)
+
+describe("no repeat across games (SeenHistory)", function()
+    local SeenHistory = require("seen_history")
+    local function fakePlugin()
+        local store = {}
+        return {
+            getSetting = function(_, k, d) if store[k] == nil then return d end return store[k] end,
+            saveSetting = function(_, k, v) store[k] = v end,
+            store = store,
+        }
+    end
+
+    for _, lang in ipairs({ "fr", "en" }) do
+        it(lang .. ": consecutive games draw new categories until the selection is used up", function()
+            local plugin = fakePlugin()
+            local function session()
+                return newGame{ lang = lang, nb_categories = 12, packs = { geo = true },
+                    seen = SeenHistory.open(plugin, "cats_" .. lang, { max = 1500 }) }
+            end
+            local pool = #session():eligibleCategories()
+            local seen, drawn = {}, 0
+            -- several sessions (a new Game, the history reopened from settings each time)
+            while drawn + 12 <= pool do
+                local g = session()
+                local r = g:startRound()
+                for _, c in ipairs(r.categories) do
+                    assert.is_nil(seen[c], "repeated before the pool ran out: " .. c)
+                    seen[c] = true
+                    drawn = drawn + 1
+                end
+            end
+            assert.is_true(drawn >= 100)
+            -- the pool runs out: the next draws still give a full, distinct round
+            local g = session()
+            for _ = 1, 3 do
+                local r = g:startRound()
+                assert.are.equal(12, #r.categories)
+                local d = {}
+                for _, c in ipairs(r.categories) do assert.is_nil(d[c]); d[c] = true end
+            end
+        end)
+    end
+
+    it("keeps one history per language", function()
+        local plugin = fakePlugin()
+        newGame{ lang = "fr", seen = SeenHistory.open(plugin, "cats_fr") }:startRound()
+        assert.is_table(plugin.store.seen_cats_fr)
+        assert.is_nil(plugin.store.seen_cats_en)
+    end)
+end)
+
+describe("content families", function()
+    it("no category text is shared between packs or appears twice", function()
+        for _, lang in ipairs({ "fr", "en" }) do
+            local seen = {}
+            for _, c in ipairs(bank(lang)) do
+                local k = c.text:lower():gsub("%s+", " ")
+                assert.is_nil(seen[k], lang .. " duplicate: " .. c.text)
+                seen[k] = c.tag
+            end
+        end
     end)
 end)
