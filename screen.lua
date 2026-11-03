@@ -36,6 +36,7 @@ end
 
 local MenuHelper = require("menu_helper")
 local ScreenBase = require("screen_base")
+local SeenHistory = require("seen_history")
 local Game       = lrequire("game")
 local W          = lrequire("widgets")
 
@@ -135,12 +136,19 @@ function CategoriesScreen:init()
         hard_letters  = plugin:getSetting("hard_letters", false),
         packs         = self:_loadPacks(),
         scoring       = plugin:getSetting("scoring", "2-1"),
+        seen          = self:_openSeen(self.lang),
     }
     self.game:load(plugin:loadState())
     ScreenBase.init(self)
     if self.game.phase == "play" and self:_timeLeft() then
         self:_startCountdown()
     end
+end
+
+-- Categories drawn in earlier games (one history per content language), so
+-- the next games bring new ones until the selection has been used up.
+function CategoriesScreen:_openSeen(lang)
+    return SeenHistory.open(self.plugin, "cats_" .. lang, { max = 1500 })
 end
 
 function CategoriesScreen:_loadPacks()
@@ -366,6 +374,7 @@ function CategoriesScreen:openLangMenu()
             self.plugin:saveSetting("lang", lang)
             self.game.lang = lang
             self.game.bank = loadBank(lang)
+            self.game.seen = self:_openSeen(lang)
             self.game.used_cats = {}
         end)
 end

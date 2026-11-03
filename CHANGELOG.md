@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0] - 2026-11-03
+
+### Added
+- About twice as many categories: 962 in French and 962 in English (was
+  457 / 479), about 120 per pack — new ones such as *a character from
+  Molière*, *a préfecture*, *a Paris metro station*, *a Tube station*,
+  *a character from Roald Dahl*, *what the gargoyles gossip about*…
+
+### Changed
+- The categories already drawn are remembered from one game to the next
+  (one memory per content language): new games bring new categories, and
+  none comes back until the whole selection has been played.
+
 ## [1.0.2] - 2026-11-02
 
 ### Changed
