@@ -81,10 +81,6 @@ local function gameName()
     return t == NAME_KEY and "Categories" or t
 end
 
-local function defaultLang()
-    return _.lang() == "fr" and "fr" or "en"
-end
-
 local function loadBank(lang)
     local chunk = loadfile(_dir .. "content_" .. lang .. ".lua")
     local ok, data = pcall(chunk or error)
@@ -122,7 +118,7 @@ CategoriesScreen.gameName = gameName
 
 function CategoriesScreen:init()
     local plugin = self.plugin
-    self.lang     = plugin:getSetting("lang", defaultLang())
+    self.lang     = plugin:getLang({ "fr", "en" })
     self.duration = plugin:getSetting("duration", 120)
     local names   = plugin:getSetting("players", nil)
     if type(names) ~= "table" or #names == 0 then
@@ -340,8 +336,8 @@ end
 -- Same number of players: rename and keep the scores; otherwise a new game.
 function CategoriesScreen:applyPlayerNames(text)
     local names = {}
-    for line in (text .. "\n"):gmatch("(.-)\n") do
-        line = line:gsub("^%s+", ""):gsub("%s+$", "")
+    for raw in (text .. "\n"):gmatch("(.-)\n") do
+        local line = raw:gsub("^%s+", ""):gsub("%s+$", "")
         if line ~= "" and #names < MAX_PLAYERS then names[#names + 1] = line end
     end
     if #names == 0 then return end
@@ -371,7 +367,7 @@ function CategoriesScreen:openLangMenu()
         { { id = "fr", text = "Français" }, { id = "en", text = "English" } }, self.lang,
         function(lang)
             self.lang = lang
-            self.plugin:saveSetting("lang", lang)
+            self.plugin:setLang(lang)
             self.game.lang = lang
             self.game.bank = loadBank(lang)
             self.game.seen = self:_openSeen(lang)
