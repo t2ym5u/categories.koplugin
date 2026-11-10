@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0] - 2026-11-10
+
+### Added
+- Twice as many French categories: 1,974 (was 962), about 120 more in
+  each of the eight packs. The game remembers the last 2,500 categories
+  it dealt (was 1,500), so it goes through all of them before repeating.
+
 ## [1.1.3] - 2026-11-09
 
 ### Fixed

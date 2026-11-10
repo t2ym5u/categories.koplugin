@@ -144,7 +144,7 @@ end
 -- Categories drawn in earlier games (one history per content language), so
 -- the next games bring new ones until the selection has been used up.
 function CategoriesScreen:_openSeen(lang)
-    return SeenHistory.open(self.plugin, "cats_" .. lang, { max = 1500 })
+    return SeenHistory.open(self.plugin, "cats_" .. lang, { max = 2500 })
 end
 
 function CategoriesScreen:_loadPacks()
