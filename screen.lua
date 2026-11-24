@@ -180,7 +180,7 @@ end
 function CategoriesScreen:_startCountdown()
     self._tick_gen = (self._tick_gen or 0) + 1
     local gen = self._tick_gen
-    UIManager:scheduleIn(1, function() self:_onTick(gen) end)
+    self:schedule(1, function() self:_onTick(gen) end)
 end
 
 function CategoriesScreen:_stopCountdown()
@@ -208,7 +208,7 @@ function CategoriesScreen:_onTick(gen)
             return "fast", self.timer_frame and self.timer_frame.dimen or self.dimen
         end)
     end
-    UIManager:scheduleIn(1, function() self:_onTick(gen) end)
+    self:schedule(1, function() self:_onTick(gen) end)
 end
 
 -- ---------------------------------------------------------------------------
@@ -277,6 +277,7 @@ function CategoriesScreen:onNextRound()
 end
 
 function CategoriesScreen:onNewGame()
+    self:cancelScheduled()
     self:_stopCountdown()
     local names = {}
     for i, p in ipairs(self.game.players) do names[i] = p.name end
